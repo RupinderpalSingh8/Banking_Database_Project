@@ -1,0 +1,434 @@
+CREATE TABLE customer 
+   ( 
+       custid VARCHAR(6), 
+       fname VARCHAR(30), 
+       ltname VARCHAR(30), 
+       city VARCHAR(15), 
+       mobileno VARCHAR(10), 
+       occupation VARCHAR(20), 
+       dob DATE, 
+      CONSTRAINT customer_custid_pk PRIMARY KEY(custid)    
+   )
+;
+
+   desc customer
+
+
+
+   CREATE TABLE branch 
+   ( 
+    bid VARCHAR(6), 
+    bname VARCHAR(30), 
+    bcity VARCHAR(30), 
+    CONSTRAINT branch_bid_pk PRIMARY KEY(bid)  
+   )
+;
+
+   desc branch
+
+
+
+   CREATE TABLE account 
+   ( 
+      acnumber VARCHAR(6), 
+      custid  VARCHAR(6), 
+      bid VARCHAR(6), 
+      opening_balance NUMBER(7), 
+      aod DATE, 
+      atype VARCHAR(10), 
+      astatus VARCHAR(10), 
+      CONSTRAINT account_acnumber_pk PRIMARY KEY(acnumber), 
+      CONSTRAINT account_custid_fk FOREIGN KEY(custid) REFERENCES customer(custid), 
+      CONSTRAINT account_bid_fk FOREIGN KEY(bid) REFERENCES branch(bid)  
+    )
+;
+
+    desc account
+
+
+
+    CREATE TABLE loan 
+   ( 
+    
+    custid VARCHAR(6), 
+    bid VARCHAR(6), 
+    loan_amount INT, 
+    CONSTRAINT loan_customer_custid_bid_pk PRIMARY KEY(custid,bid), 
+    CONSTRAINT loan_custid_fk FOREIGN KEY(custid) REFERENCES  customer(custid), 
+    CONSTRAINT loan_bid_fk FOREIGN KEY(bid) REFERENCES  branch(bid) 
+   )
+;
+
+   desc loan
+
+
+
+  INSERT INTO customer VALUES('C1','Ramesh','Sharma','Delhi','9543198345','Service',DATE'1976-12-06')
+;
+
+INSERT INTO customer VALUES('C2','Avinash','Minha','Delhi','9876532109','Service',DATE'1974-10-16')
+;
+
+INSERT INTO customer VALUES('C3','Rahul','Rastogi','Delhi','9765178901','Student',DATE'1981-09-26')
+;
+
+INSERT INTO customer VALUES('C4','Parul','Gandhi','Delhi','9876532109','Housewife',DATE'1976-11-03')
+;
+
+INSERT INTO customer VALUES('C5','Naveen','Aedekar','Mumbai','8976523190','Service',DATE'1976-09-19')
+;
+
+INSERT INTO customer VALUES('C6','Chitresh','Barwe','Mumbai','7651298321','Student',DATE'1992-11-06')
+;
+
+INSERT INTO customer VALUES('C7','Amit','Borkar','Mumbai','9875189761','Student',DATE'1981-09-06')
+;
+
+INSERT INTO customer VALUES('C8','Nisha','Damle','Mumbai','7954198761','Service',DATE'1975-12-03')
+;
+
+INSERT INTO customer VALUES('C9','Abhishek','Dutta','Kolkata','9856198761','Service',DATE'1973-05-22')
+;
+
+INSERT INTO customer  VALUES('C10','Shankar','Nair','Chennai','8765489076','Service',DATE'1976-07-12')
+;
+
+select * from customer
+;
+
+INSERT INTO branch VALUES('B1','Asaf ali road','Delhi')
+;
+
+INSERT INTO branch VALUES('B2','New delhi main branch','Delhi')
+;
+
+INSERT INTO branch VALUES('B3','Delhi cantt','Delhi')
+;
+
+INSERT INTO branch VALUES('B4','Jasola','Delhi')
+;
+
+INSERT INTO branch VALUES('B5','Mahim','Mumbai')
+;
+
+INSERT INTO branch VALUES('B6','Vile parle','Mumbai')
+;
+
+INSERT INTO branch VALUES('B7','Mandvi','Mumbai')
+;
+
+INSERT INTO branch VALUES('B8','Jadavpur','Kolkata')
+;
+
+INSERT INTO branch VALUES('B9','Kodambakkam','Chennai')
+;
+
+select * from branch
+;
+
+
+
+INSERT INTO account VALUES('A1','C1','B1',1000,DATE'2012-12-15','Saving','Active')
+;
+
+INSERT INTO account VALUES('A2','C2','B1',1000,DATE'2012-06-12','Saving','Active')
+;
+
+INSERT INTO account VALUES('A3','C3','B2',1000,DATE'2012-05-17','Saving','Active')
+;
+
+INSERT INTO account VALUES('A4','C2','B5',1000,DATE'2013-01-27','Saving','Active')
+;
+
+INSERT INTO account VALUES('A5','C6','B6',1000,DATE'2012-12-17','Saving','Active')
+;
+
+INSERT INTO account VALUES('A6','C7','B7',1000,DATE'2010-08-12','Saving','Suspended')
+;
+
+INSERT INTO account VALUES('A7','C7','B1',1000,DATE'2012-10-02','Saving','Active')
+;
+
+INSERT INTO account VALUES('A8','C1','B3',1000,DATE'2009-11-09','Saving','Terminated')
+;
+
+INSERT INTO account VALUES('A9','C3','B7',1000,DATE'2008-11-30','Saving','Terminated')
+;
+
+INSERT INTO account VALUES('A10','C4','B2',1000,DATE'2013-03-01','Saving','Active')
+;
+
+select * from account
+;
+/*QUERY 1*/
+/*Write a query to display the customer number, firstname, customer’s date of birth. Display in sorted order of date of birth year and within that sort by firstname.*/
+SELECT custid, fname, ltname,dob 
+FROM customer 
+ORDER BY EXTRACT(year FROM dob), fname ASC;
+
+/*QUERY 2*/
+/*Write a query to display account number, customer’s number, customer’s firstname,lastname,account opening date.*/
+SELECT account.acnumber, customer.custid, customer.fname, customer.ltname, account.aod
+FROM account
+INNER JOIN customer 
+ON account.custid = customer.custid;
+
+/*QUERY 3*/
+/*Write a query to display the number of customer’s from Delhi. Give the count an alias name of Cust_Count.*/
+SELECT 
+		(SELECT COUNT(city)
+		FROM customer
+		WHERE city=’Delhi’)
+AS Cust_Count;
+/*QUERY 4*/
+/*Write a query to display  the customer number, customer firstname,account number for the customer’s whose accounts were created after 15th of any month.*/
+SELECT account.custid, customer.fname, account.acnumber
+FROM account, customer
+WHERE account.custid = customer.custid
+AND day(aod) > 15;
+
+/*QUERY 5*/
+/*Write a query to display the female customers firstname, city and account number who are not into business, service or studies.*/
+SELECT DISTINCT customer.fname, customer.city, account.acnumber
+FROM account, customer
+WHERE account.custid = customer.custid
+AND NOT(occupation='business' or occupation='service' or occupation='student');
+
+/*QUERY 6*/
+/*Write a query to display city name and count of branches in that city. Give the count of branches an alias name of Count_Branch.*/
+SELECT bcity, count(*)
+AS Count_Branch 
+FROM branch
+Group By bcity;
+
+/*QUERY 7*/
+/*Write a query to display account id, customer’s firstname, customer’s lastname for the customer’s whose account is Active.*/
+SELECT account.acnumber, customer.fname, customer.ltname
+FROM account, customer
+WHERE account.custid = customer.custid
+AND astatus = 'Active';
+
+/*QUERY 8*/
+/*Write a query to display the customer’s number, customer’s firstname, branch id and loan amount for people who have taken loans.*/
+SELECT customer.custid, customer.fname, branch.bid, loan.loan_amount
+FROM ((loan
+INNER JOIN customer ON loan.custid=customer.custid)
+INNER JOIN branch ON loan.bid=branch.bid);
+
+/*QUERY 9*/
+/*Write a query to display customer number, customer name, account number where the account status is terminated.*/
+SELECT customer.custid, customer.fname, account.acnumber
+FROM account, customer
+WHERE account.custid = customer.custid
+AND astatus = 'Terminated';
+
+
+/*PL/SQL TRANSACTIONS*/
+acct_master (acct_no number(5) primary key, 
+                         acct_name varchar2(10), 
+                            balance number(10)); 
+/* CREATING table acct_master */
+create table acct_master(acct_no number(5) primary key, 
+                                acct_name varchar2(10), 
+                                   balance number(10)); 
+/*INSERTING data in acct_mstr*/
+insert into acct_master values(1, 'aaa', 1000);
+insert into acct_master values(2, 'bbb', 100);
+insert into acct_master values(3, 'ccc', 1100);
+insert into acct_master values(4, 'ddd', 700);
+insert into acct_master values(5, 'eee', 1700); 
+select * from acct_master;
+-- DECLARING VARIABLES
+DECLARE
+xacct_no number(5);
+
+-- here, minimum balance is set to 1000;
+xmin_bal number(5):=1000;
+xbalance number(5);
+
+BEGIN
+
+-- taking input from user
+xacct_no:= 2;
+
+-- selecting balance of that user INTO "xbalance";
+select balance into xbalance
+from acct_master
+where acct_no=xacct_no;
+
+-- if condition true, updating balance
+-- with balance = balance - 100
+IF(xbalance < xmin_bal) THEN --condition check
+update acct_master
+set balance=balance-100
+where acct_no=xacct_no;
+						
+-- remaining amount																
+xbalance:=xbalance-100;
+dbms_output.put_line('Rs 100 is deducted and current balance is '||xbalance);
+
+-- if condition is false
+ELSE			
+dbms_output.put_line('Current balance is '||xbalance);
+
+--ENDING IF
+END IF;	
+
+-- ENDING OF BEGIN
+END;
+
+#########
+
+
+/*CURSORS*/
+/*IMPLICIT CURSORS */
+/*The following program will update the table and increase the salary of each customer by 500 
+and use the SQL%ROWCOUNT attribute to determine the number of rows affected */
+
+DECLARE  
+   total_rows number(2); 
+BEGIN 
+   UPDATE customers 
+   SET salary = salary + 500; 
+   IF sql%notfound THEN 
+      dbms_output.put_line('no customers selected'); 
+   ELSIF sql%found THEN 
+      total_rows := sql%rowcount;
+      dbms_output.put_line( total_rows || ' customers selected '); 
+   END IF;  
+END; 
+Select * from customers; 
+/*EXPLICIT CURSORS*/
+   
+DECLARE 
+   c_id customers.id%type; 
+   c_name customers.name%type; 
+   c_addr customers.address%type; 
+   CURSOR c_customers is 
+      SELECT id, name, address FROM customers; 
+BEGIN 
+   OPEN c_customers; 
+   LOOP 
+   FETCH c_customers into c_id, c_name, c_addr; 
+      EXIT WHEN c_customers%notfound; 
+      dbms_output.put_line(c_id || ' ' || c_name || ' ' || c_addr); 
+   END LOOP; 
+   CLOSE c_customers; 
+END; 
+
+
+####
+/*PL/SQL exception handling queries*/
+Declare
+temp varchar(20);
+begin
+select custid into temp from customer where fname='ABC';
+exception
+WHEN no_data_found THEN
+DBMS_OUTPUT.PUT_LINE('EXCEPTION FOUND ....ERROR-->NO DATA FOUND');
+END;
+Declare
+temp varchar(20);
+begin
+select custid into temp from customer where fname='Parul';
+dbms_output.put_line(temp);
+exception
+WHEN too_many_rows THEN
+DBMS_OUTPUT.PUT_LINE('EXCEPTION FOUND ....ERROR-->Too many rows');
+END;
+
+####
+/*TRIGGERS*/
+/*TRIGGER 1 :To Create a trigger for the customer table, which makes the entry in custNAME column in uppercase.*/
+
+Solution:
+
+CREATE OR REPLACE TRIGGER upper_trigger
+BEFORE INSERT OR UPDATE OF fname ON customer
+FOR EACH ROW
+BEGIN
+     :new.fname : = UPER (:new.fname);
+END;
+
+
+###
+/*Trigger2*/
+To Create a trigger on the customer table, which shows the old values and new value of fname after any updation on fname of customer table.*/
+--Q2
+CREATE OR REPLACE TRIGGER CUST_UPDATE
+     AFTER UPDATE OF FNAME ON customer FOR EACH ROW
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('OLD NAME:' ||:OLD.FNAME);
+    DBMS_OUTPUT.PUT_LINE('NEW NAME:' ||:NEW.FNAME);
+END;
+
+ to update the total amount of customer everytime he makes a new account*/
+    create or replace function total_cust(custid in varchar)
+    return number
+    is
+    total number(2) :=0;
+    begin
+    select sum(cost) into total from account where product.product_id=cart_item.product_id and cart_id=cId;
+    return total;
+    end;
+
+    create or replace trigger before_pay_up
+    before insert
+    on
+    payment
+    for each row
+    declare
+    total number(3);
+    begin
+    total :=total_cost(:new.cart_id);
+    insert into payment values(:new.payment_id,:new.payment_date,:new.payment_type,:new.customer_id,:new.cart_id,total);
+    end;
+
+/*Trigger2 on the customer table, which store the mobileno and occupation in table auditor for each operation i.e. Insert, Update and Delete.
+
+Solution:
+
+CREATE OR REPLACE TRIGGER CUST_AUDIT
+AFTER INSERT OR UPDATE OR DELETE ON customer
+FOR EACH ROW
+BEGIN
+   IF INSERTING THEN
+      INSERT INTO AUDITOR VALUES(:NEW.mobileno,'INSERT');
+   ELSIF UPDATING THEN
+      INSERT INTO AUDITOR VALUES(:NEW.mobileno,'UPDATE');
+   ELSIF DELETING THEN
+      INSERT INTO AUDITOR VALUES(:OLD.mobileno,'DELETE');
+   END IF;
+END; 
+
+/*Trigger 3 --To Create a trigger on customer table, which store the custid and fname in table auditor for each operation i.e. Insert, Update and Delete.
+
+--Solution:
+create table AUDITORR(custnewid varchar(35));
+CREATE OR REPLACE TRIGGER cust_audit 
+AFTER INSERT OR UPDATE OR DELETE ON customer
+FOR EACH ROW
+BEGIN
+   IF INSERTING THEN
+      INSERT INTO AUDITORR VALUES(:NEW.custid,'INSERT');
+   ELSIF UPDATING THEN
+      INSERT INTO AUDITORR VALUES(:NEW.custid,'UPDATE');
+   ELSIF DELETING THEN
+      INSERT INTO AUDITORR VALUES(:OLD.custid,'DELETE');
+   END IF;
+END;
+
+###FUNCTIONS 
+/*Function which returns total number of accounts in a branch*/
+    create or replace function totalAccounts(bid in varchar)
+    return number
+    is
+    total number(2):=0;
+    begin
+    select count(*) into total
+    from 
+    where seller_id=sId;
+    return total;
+    end;
+    /
+
